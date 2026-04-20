@@ -13,7 +13,8 @@
     "start:client": "npm run start --workspace=client",
     "dev": "concurrently \"npm run dev --workspace=server\" \"npm run dev --workspace=client\"",
     "build": "npm run build --workspace=server && npm run build --workspace=client",
-    "install:all": "npm install && npm install --workspace=server && npm install --workspace=client"
+    "install:all": "npm install && npm install --workspace=server && npm install --workspace=client",
+    "format": "prettier --write \"src/**/*.ts\""
   },
   "keywords": [
     "websocket",
@@ -24,7 +25,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "prettier": "^3.8.3"
   },
   "dependencies": {
     "chalk": "^5.6.2"
