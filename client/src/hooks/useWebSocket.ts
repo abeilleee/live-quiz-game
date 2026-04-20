@@ -49,7 +49,9 @@ export const useWebSocket = (url: string) => {
 
         if (reconnectAttempts.current < MAX_RECONNECT_ATTEMPTS) {
           reconnectAttempts.current++;
-          console.log(`Reconnecting (${reconnectAttempts.current}/${MAX_RECONNECT_ATTEMPTS})...`);
+          console.log(
+            `Reconnecting (${reconnectAttempts.current}/${MAX_RECONNECT_ATTEMPTS})...`
+          );
           reconnectTimer.current = setTimeout(connect, RECONNECT_DELAY);
         }
       };

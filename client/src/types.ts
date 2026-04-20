@@ -1,13 +1,13 @@
 export interface Question {
   text: string;
-  options: string[];       // exactly 4 options
-  correctIndex: number;    // index of the correct option (0-3)
-  timeLimitSec: number;    // time limit for the question in seconds
+  options: string[]; // exactly 4 options
+  correctIndex: number; // index of the correct option (0-3)
+  timeLimitSec: number; // time limit for the question in seconds
 }
 
 export interface Player {
   name: string;
-  index: number | string;  // unique player id
+  index: number | string; // unique player id
   score: number;
 }
 
