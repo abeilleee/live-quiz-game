@@ -1,4 +1,5 @@
 import type { WebSocket } from 'ws';
+import { CLIENT_MSG } from './constants';
 
 export interface Player {
   name: string;
@@ -65,3 +66,21 @@ export interface AnswerData {
   questionIndex: number;
   answerIndex: number;
 }
+
+export interface ServerResponse {
+  type: string;
+  data: RegResponseData;
+  id: string;
+}
+
+export interface RegResponseData {
+  name: string;
+  index: number | string;
+  error: boolean;
+  errorText: string;
+}
+
+export type UserAction = {
+  type: CLIENT_MSG.REGISTER;
+  payload: { name: string; password: string };
+};
