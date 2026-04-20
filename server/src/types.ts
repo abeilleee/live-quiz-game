@@ -1,5 +1,5 @@
 import type { WebSocket } from 'ws';
-import { CLIENT_MSG } from './constants';
+import { CLIENT_MSG, SERVER_MSG } from './constants';
 
 export interface Player {
   name: string;
@@ -69,7 +69,7 @@ export interface AnswerData {
 
 export interface ServerResponse {
   type: string;
-  data: RegResponseData;
+  data: RegResponseData | GameCreatedResponseData;
   id: string;
 }
 
@@ -80,7 +80,14 @@ export interface RegResponseData {
   errorText: string;
 }
 
+export interface GameCreatedResponseData extends StartGameData, JoinGameData {}
+
 export type UserAction = {
   type: CLIENT_MSG.REGISTER;
   payload: { name: string; password: string };
+};
+
+export type GameAction = {
+  type: SERVER_MSG.GAME_CREATED;
+  payload: CreateGameData & { hostId: string };
 };
