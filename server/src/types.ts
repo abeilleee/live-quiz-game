@@ -1,5 +1,5 @@
 import type { WebSocket } from 'ws';
-import { CLIENT_MSG, SERVER_MSG } from './constants';
+import { CLIENT_MSG } from './constants';
 
 export interface Player {
   name: string;
@@ -69,7 +69,7 @@ export interface AnswerData {
 
 export interface ServerResponse {
   type: string;
-  data: RegResponseData | GameCreatedResponseData;
+  data: unknown;
   id: string;
 }
 
@@ -82,12 +82,34 @@ export interface RegResponseData {
 
 export interface GameCreatedResponseData extends StartGameData, JoinGameData {}
 
+export interface JoinGameResultData {
+  success: boolean;
+  error: boolean;
+  errorText: string;
+  gameId?: string;
+  players?: Player[];
+  joinedPlayerName?: string;
+}
+
 export type UserAction = {
-  type: CLIENT_MSG.REGISTER;
+  type: CLIENT_MSG;
   payload: { name: string; password: string };
 };
 
-export type GameAction = {
-  type: SERVER_MSG.GAME_CREATED;
-  payload: CreateGameData & { hostId: string };
-};
+export type GameAction =
+  | {
+      type: CLIENT_MSG.CREATE_GAME;
+      payload: CreateGameData & { hostId: string };
+    }
+  | {
+      type: CLIENT_MSG.JOIN_GAME;
+      payload: JoinGameData & { player: Player };
+    }
+  | {
+      type: CLIENT_MSG.START_GAME;
+      payload: StartGameData;
+    }
+  | {
+      type: CLIENT_MSG.ANSWER;
+      payload: AnswerData;
+    };

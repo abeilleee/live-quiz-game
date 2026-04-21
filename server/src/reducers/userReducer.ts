@@ -18,10 +18,10 @@ export const userReducer = (
   action: UserAction
 ): ReturnedResult => {
   const newState = new Map(state);
+  const { name, password } = action.payload;
 
   switch (action.type) {
     case CLIENT_MSG.REGISTER:
-      const { name, password } = action.payload;
       const isRegistered = state.has(name);
 
       if (isRegistered) {
@@ -62,6 +62,15 @@ export const userReducer = (
         result: {
           success: true,
           data: { name, index, error: false, errorText: '' },
+        },
+      };
+
+    default:
+      return {
+        state: newState,
+        result: {
+          success: true,
+          data: { name, index: '', error: false, errorText: '' },
         },
       };
   }
