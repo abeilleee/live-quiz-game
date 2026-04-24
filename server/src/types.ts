@@ -107,7 +107,7 @@ export type GameAction =
     }
   | {
       type: CLIENT_MSG.START_GAME;
-      payload: StartGameData;
+      payload: StartGameData & { hostId: string };
     }
   | {
       type: CLIENT_MSG.ANSWER;

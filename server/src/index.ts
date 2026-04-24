@@ -1,6 +1,6 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { Logger } from './utils/logger';
-import { Player, ServerResponse } from './types';
+import { Game, Player, ServerResponse } from './types';
 import { BASE_IDX, CLIENT_MSG, SERVER_MSG } from './constants';
 import { userStore } from './store/userStore';
 import { gameStore } from './store/gameStore';
@@ -17,6 +17,19 @@ const sendToSocket = (ws: WebSocket, response: ServerResponse) => {
 
 type SessionUser = { index: string; name: string };
 const wsToUser = new Map<WebSocket, SessionUser>();
+
+const broadcastToGameParticipants = (game: Game, message: ServerResponse) => {
+  const participantIndexes = new Set<string>([
+    String(game.hostId),
+    ...game.players.map((player) => String(player.index)),
+  ]);
+
+  wsToUser.forEach((sessionUser, socket) => {
+    if (participantIndexes.has(sessionUser.index)) {
+      sendToSocket(socket, message);
+    }
+  });
+};
 
 wss.on('connection', (ws) => {
   ws.on('message', (message) => {
@@ -111,9 +124,25 @@ wss.on('connection', (ws) => {
           id: BASE_IDX,
         });
 
-        const playerIndexes = new Set(joinResult.players.map((player) => String(player.index)));
+        let lobbyGame: Game | undefined;
+        for (const game of gameStore.getState().values()) {
+          if (game.id === joinResult.gameId) {
+            lobbyGame = game;
+            break;
+          }
+        }
+
+        const lobbyRecipients = new Set<string>(
+          lobbyGame
+            ? [
+                String(lobbyGame.hostId),
+                ...joinResult.players.map((player) => String(player.index)),
+              ]
+            : joinResult.players.map((player) => String(player.index))
+        );
+
         wsToUser.forEach((sessionUser, socket) => {
-          if (!playerIndexes.has(sessionUser.index)) {
+          if (!lobbyRecipients.has(sessionUser.index)) {
             return;
           }
 
@@ -132,6 +161,50 @@ wss.on('connection', (ws) => {
           });
         });
 
+        break;
+      }
+
+      case CLIENT_MSG.START_GAME: {
+        if (!user) {
+          sendToSocket(ws, {
+            type: SERVER_MSG.ERROR,
+            data: { message: 'Please register first' },
+            id: BASE_IDX,
+          });
+          break;
+        }
+
+        const startResult = gameStore.dispatch({
+          type: CLIENT_MSG.START_GAME,
+          payload: { ...msg.data, hostId: user.index },
+        });
+
+        if (
+          !('success' in startResult) ||
+          !startResult.success ||
+          !('question' in startResult) ||
+          !startResult.question ||
+          !('game' in startResult) ||
+          !startResult.game
+        ) {
+          sendToSocket(ws, {
+            type: SERVER_MSG.ERROR,
+            data: {
+              message:
+                'errorText' in startResult && startResult.errorText
+                  ? startResult.errorText
+                  : 'Failed to start game',
+            },
+            id: BASE_IDX,
+          });
+          break;
+        }
+
+        broadcastToGameParticipants(startResult.game, {
+          type: SERVER_MSG.QUESTION,
+          data: startResult.question,
+          id: BASE_IDX,
+        });
         break;
       }
     }

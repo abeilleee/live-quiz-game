@@ -85,6 +85,68 @@ export const gameReducer = (state: Map<string, Game>, action: GameAction) => {
       };
     }
 
+    case CLIENT_MSG.START_GAME: {
+      const { gameId, hostId } = action.payload;
+
+      let game: Game | undefined;
+      for (const [, g] of newState) {
+        if (g.id === gameId) {
+          game = g;
+          break;
+        }
+      }
+
+      if (!game) {
+        Logger.error('❌ Game not found');
+
+        return {
+          state: newState,
+          result: {
+            success: false,
+            errorText: 'Game not found',
+          },
+        };
+      }
+
+      if (String(game.hostId) !== String(hostId)) {
+        Logger.warning('⚠️ Start_game: not the host');
+
+        return {
+          state: newState,
+          result: {
+            success: false,
+            errorText: 'Only the host can start the game',
+          },
+        };
+      }
+
+      game.status = 'in_progress';
+      game.currentQuestion = 0;
+      game.playerAnswers = new Map();
+      game.questionStartTime = Date.now();
+
+      const first = game.questions[0];
+      const questionPayload = {
+        questionNumber: 1,
+        totalQuestions: game.questions.length,
+        text: first.text,
+        options: first.options,
+        timeLimitSec: first.timeLimitSec,
+      };
+
+      Logger.success('🎮 Game started — question 1 sent');
+
+      return {
+        state: newState,
+        result: {
+          success: true,
+          errorText: '',
+          game,
+          question: questionPayload,
+        },
+      };
+    }
+
     default:
       return { state: newState, result: { gameId: '', code: '' } };
   }
