@@ -1,5 +1,5 @@
 import type { WebSocket } from "ws";
-import { CLIENT_MSG } from "./constants";
+import { CLIENT_MSG, SERVER_MSG } from "./constants";
 
 export interface Player {
   name: string;
@@ -30,6 +30,24 @@ export interface Game {
   questionTimer?: NodeJS.Timeout;
   playerAnswers: Map<string, { answerIndex: number; timestamp: number }>;
 }
+
+export type GameAction =
+  | {
+      type: CLIENT_MSG.CREATE_GAME;
+      payload: CreateGameData & { hostId: string };
+    }
+  | {
+      type: CLIENT_MSG.JOIN_GAME;
+      payload: JoinGameData & { player: Player };
+    }
+  | {
+      type: CLIENT_MSG.START_GAME;
+      payload: StartGameData & { hostId: string };
+    }
+  | {
+      type: CLIENT_MSG.ANSWER;
+      payload: AnswerData;
+    };
 
 export interface User {
   name: string;

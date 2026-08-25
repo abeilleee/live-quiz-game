@@ -2,6 +2,7 @@ import { WebSocketServer } from "ws";
 import { Logger } from "./utils/logger";
 import { CLIENT_MSG } from "./constants";
 import { handleRegister } from "./handlers/register";
+import { handleCreateGame } from "./handlers/createGame";
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
@@ -20,7 +21,7 @@ wss.on("connection", (ws) => {
         break;
 
       case CLIENT_MSG.CREATE_GAME:
-        Logger.plain("Game created");
+        handleCreateGame({ ws, payload });
         break;
 
       case CLIENT_MSG.JOIN_GAME:

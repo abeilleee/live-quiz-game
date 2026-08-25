@@ -24,4 +24,6 @@ export const BASE_IDX = 0;
 export const enum ERROR {
   UNEXPECTED_ERROR = "Unexpected error",
   WRONG_PASSWORD = "Wrong password",
+  NO_QUESTIONS = "No questions provided",
+  FAILED_TO_CREATE_GAME = "Failed to create game",
 }
