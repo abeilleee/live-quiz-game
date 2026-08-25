@@ -1,6 +1,7 @@
 import { WebSocketServer } from "ws";
 import { Logger } from "./utils/logger";
 import { CLIENT_MSG } from "./constants";
+import { handleRegister } from "./handlers/register";
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
@@ -11,19 +12,28 @@ Logger.success(`🚀 Websocker server started on ${PORT} port`);
 wss.on("connection", (ws) => {
   ws.on("message", (message) => {
     const msg = JSON.parse(message.toString());
-    const { type } = msg;
+    const { type, data: payload } = msg;
 
     switch (type) {
       case CLIENT_MSG.REGISTER:
-        Logger.user("User registered");
+        handleRegister({ ws, payload });
+        break;
+
       case CLIENT_MSG.CREATE_GAME:
         Logger.plain("Game created");
+        break;
+
       case CLIENT_MSG.JOIN_GAME:
         Logger.plain("Game joined");
+        break;
+
       case CLIENT_MSG.START_GAME:
         Logger.plain("Game started");
+        break;
+
       case CLIENT_MSG.ANSWER:
         Logger.plain("Answer sent");
+        break;
     }
   });
 

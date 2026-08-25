@@ -1,4 +1,5 @@
-import type { WebSocket } from 'ws';
+import type { WebSocket } from "ws";
+import { CLIENT_MSG } from "./constants";
 
 export interface Player {
   name: string;
@@ -24,7 +25,7 @@ export interface Game {
   questions: Question[];
   players: Player[];
   currentQuestion: number;
-  status: 'waiting' | 'in_progress' | 'finished';
+  status: "waiting" | "in_progress" | "finished";
   questionStartTime?: number;
   questionTimer?: NodeJS.Timeout;
   playerAnswers: Map<string, { answerIndex: number; timestamp: number }>;
@@ -36,6 +37,11 @@ export interface User {
   index: string;
   ws?: WebSocket;
 }
+
+export type UserAction = {
+  type: CLIENT_MSG;
+  payload: { name: string; password: string };
+};
 
 export interface WSMessage {
   type: string;
@@ -64,4 +70,11 @@ export interface AnswerData {
   gameId: string;
   questionIndex: number;
   answerIndex: number;
+}
+
+export interface RegResponseData {
+  name: string;
+  index: string;
+  error: boolean;
+  errorText: string;
 }

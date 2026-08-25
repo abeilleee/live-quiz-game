@@ -18,3 +18,10 @@ export enum SERVER_MSG {
   GAME_FINISHED = "game_finished",
   ERROR = "error",
 }
+
+export const BASE_IDX = 0;
+
+export const enum ERROR {
+  UNEXPECTED_ERROR = "Unexpected error",
+  WRONG_PASSWORD = "Wrong password",
+}
