@@ -1,5 +1,5 @@
 import type { WebSocket } from "ws";
-import { CLIENT_MSG, SERVER_MSG } from "./constants";
+import { CLIENT_MSG } from "./constants";
 
 export interface Player {
   name: string;

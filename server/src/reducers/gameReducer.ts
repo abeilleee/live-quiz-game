@@ -13,8 +13,8 @@ import { Logger } from "../utils/logger";
 export interface Result {
   success: boolean;
   data: CreateGameData | JoinGameData | StartGameData | {};
-  error?: boolean;
   errorText?: string;
+  game?: Game;
 }
 
 interface ReturnedValue {
@@ -29,7 +29,7 @@ export const gameReducer = (
   const newState = new Map(state);
 
   switch (action.type) {
-    case CLIENT_MSG.CREATE_GAME:
+    case CLIENT_MSG.CREATE_GAME: {
       const { questions, hostId } = action.payload;
 
       if (!Array.isArray(questions) || questions.length === 0) {
@@ -37,7 +37,8 @@ export const gameReducer = (
           state,
           result: {
             success: false,
-            data: { error: true, errorText: ERROR.NO_QUESTIONS },
+            data: {},
+            errorText: ERROR.NO_QUESTIONS,
           },
         };
       }
@@ -71,6 +72,39 @@ export const gameReducer = (
           data: { gameId, code },
         },
       };
+    }
+
+    case CLIENT_MSG.JOIN_GAME: {
+      const { code, player } = action.payload;
+      const game = newState.get(code);
+
+      // Check game exists, game status is waiting and user isn't in the game
+      if (
+        !game ||
+        game.status !== "waiting" ||
+        game.players.find((p) => p.index === player.index)
+      ) {
+        return {
+          state,
+          result: {
+            success: false,
+            data: {},
+            errorText: ERROR.FAILED_TO_JOIN_GAME,
+          },
+        };
+      }
+
+      game.players.push(player);
+
+      return {
+        state: newState,
+        result: {
+          success: true,
+          data: { gameId: game.id },
+          game,
+        },
+      };
+    }
 
     default:
       return { state, result: { success: false, data: {} } };

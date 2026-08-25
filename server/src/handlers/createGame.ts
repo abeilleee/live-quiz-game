@@ -1,42 +1,30 @@
 import { WebSocket } from "ws";
-import { CLIENT_MSG, ERROR, SERVER_MSG } from "../constants";
+import { CLIENT_MSG, SERVER_MSG } from "../constants";
 import { gameStore } from "../store/gameStore";
 import { CreateGameData } from "../types";
-import { wsToUser } from "../store/session";
 import { sendTo } from "../utils/sendTo";
 
 export const handleCreateGame = ({
   ws,
   payload,
+  hostId,
 }: {
   ws: WebSocket;
   payload: CreateGameData;
+  hostId: string;
 }) => {
-  const hostId = wsToUser.get(ws)?.index;
-
-  if (!hostId) {
-    sendTo(ws, SERVER_MSG.ERROR, {
-      message: ERROR.FAILED_TO_CREATE_GAME,
-    });
-
-    return;
-  }
-
-  const { success, data } = gameStore.dispatch({
+  const result = gameStore.dispatch({
     type: CLIENT_MSG.CREATE_GAME,
     payload: { ...payload, hostId },
   });
 
-  if (!success) {
+  if (!result.success) {
     sendTo(ws, SERVER_MSG.ERROR, {
-      message:
-        data && "errorText" in data && data.errorText
-          ? data.errorText
-          : ERROR.FAILED_TO_CREATE_GAME,
+      message: result.errorText,
     });
 
     return;
   }
 
-  sendTo(ws, SERVER_MSG.GAME_CREATED, { ...data });
+  sendTo(ws, SERVER_MSG.GAME_CREATED, result.data);
 };
