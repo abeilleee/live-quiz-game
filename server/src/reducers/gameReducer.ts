@@ -7,7 +7,11 @@ import {
   JoinGameData,
   StartGameData,
 } from "../types";
-import { validateQuestions, validateStartGame } from "../validators";
+import {
+  validateAnswer,
+  validateQuestions,
+  validateStartGame,
+} from "../validators";
 import { generateCode } from "../utils/generateCode";
 import { Logger } from "../utils/logger";
 import { reject } from "../utils/reject";
@@ -130,6 +134,37 @@ export const gameReducer = (
             timeLimitSec: currentQuestion.timeLimitSec,
           },
           game,
+        },
+      };
+    }
+    case CLIENT_MSG.ANSWER: {
+      const { gameId, answerIndex, questionIndex, playerIndex } =
+        action.payload;
+      const game = findGameById(newState, gameId);
+
+      if (!game) {
+        return reject(state, ERROR.GAME_NOT_FOUND);
+      }
+
+      const errorMsg = validateAnswer(playerIndex, game, {
+        questionIndex,
+        answerIndex,
+      });
+
+      if (errorMsg) {
+        return reject(state, errorMsg);
+      }
+
+      game.playerAnswers.set(playerIndex, {
+        answerIndex,
+        timestamp: Date.now(),
+      });
+
+      return {
+        state: newState,
+        result: {
+          success: true,
+          data: { questionIndex },
         },
       };
     }

@@ -46,7 +46,7 @@ export type GameAction =
     }
   | {
       type: CLIENT_MSG.ANSWER;
-      payload: AnswerData;
+      payload: AnswerData & { playerIndex: string };
     };
 
 export interface User {

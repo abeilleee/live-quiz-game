@@ -7,6 +7,7 @@ import { handleJoinGame } from "./handlers/handleJoinGame";
 import { wsToUser } from "./store/session";
 import { sendTo } from "./utils/sendTo";
 import { handleStartGame } from "./handlers/handleStartGame";
+import { handleAnswer } from "./handlers/handleAnswer";
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
@@ -50,7 +51,7 @@ wss.on("connection", (ws) => {
         break;
 
       case CLIENT_MSG.ANSWER:
-        Logger.plain("Answer sent");
+        handleAnswer({ ws, payload, playerIndex: index });
         break;
     }
   });
