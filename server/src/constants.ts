@@ -28,4 +28,8 @@ export const enum ERROR {
   UNREGISTERED = "Please register first",
   FAILED_TO_CREATE_GAME = "Failed to create game",
   FAILED_TO_JOIN_GAME = "Failed to join game",
+  NOT_HOST = "Not the host",
+  GAME_NOT_FOUND = "Game not found",
+  GAME_ALREADY_STARTED = "Game already started",
+  NO_PLAYERS = "No players in the game",
 }

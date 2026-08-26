@@ -9,6 +9,7 @@ import {
 } from "../types";
 import { generateCode } from "../utils/generateCode";
 import { Logger } from "../utils/logger";
+import { reject } from "../utils/reject";
 
 export interface Result {
   success: boolean;
@@ -33,14 +34,7 @@ export const gameReducer = (
       const { questions, hostId } = action.payload;
 
       if (!Array.isArray(questions) || questions.length === 0) {
-        return {
-          state,
-          result: {
-            success: false,
-            data: {},
-            errorText: ERROR.NO_QUESTIONS,
-          },
-        };
+        return reject(state, ERROR.NO_QUESTIONS);
       }
 
       /** Room code */
@@ -84,14 +78,7 @@ export const gameReducer = (
         game.status !== "waiting" ||
         game.players.find((p) => p.index === player.index)
       ) {
-        return {
-          state,
-          result: {
-            success: false,
-            data: {},
-            errorText: ERROR.FAILED_TO_JOIN_GAME,
-          },
-        };
+        return reject(state, ERROR.FAILED_TO_JOIN_GAME);
       }
 
       game.players.push(player);
@@ -106,7 +93,50 @@ export const gameReducer = (
       };
     }
 
+    case CLIENT_MSG.START_GAME: {
+      const { gameId, hostId } = action.payload;
+      const game = [...newState.values()].find((g) => g.id === gameId);
+
+      if (!game) {
+        return reject(state, ERROR.GAME_NOT_FOUND);
+      }
+
+      if (game.hostId !== hostId) {
+        return reject(state, ERROR.NOT_HOST);
+      }
+
+      if (game.status !== "waiting") {
+        return reject(state, ERROR.GAME_ALREADY_STARTED);
+      }
+
+      if (game.players.length < 1) {
+        return reject(state, ERROR.NO_PLAYERS);
+      }
+
+      game.status = "in_progress";
+      game.currentQuestion = 0;
+      game.playerAnswers = new Map();
+      game.questionStartTime = Date.now();
+
+      const currentQuestion = game.questions[game.currentQuestion];
+
+      return {
+        state: newState,
+        result: {
+          success: true,
+          data: {
+            questionNumber: 1,
+            totalQuestions: game.questions.length,
+            text: currentQuestion.text,
+            options: currentQuestion.options,
+            timeLimitSec: currentQuestion.timeLimitSec,
+          },
+          game,
+        },
+      };
+    }
+
     default:
-      return { state, result: { success: false, data: {} } };
+      return reject(state, ERROR.UNEXPECTED_ERROR);
   }
 };
