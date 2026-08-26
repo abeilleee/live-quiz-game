@@ -25,6 +25,7 @@ export const enum ERROR {
   UNEXPECTED_ERROR = "Unexpected error",
   WRONG_PASSWORD = "Wrong password",
   NO_QUESTIONS = "No questions provided",
+  INVALID_QUESTIONS = "Invalid questions",
   UNREGISTERED = "Please register first",
   FAILED_TO_CREATE_GAME = "Failed to create game",
   FAILED_TO_JOIN_GAME = "Failed to join game",

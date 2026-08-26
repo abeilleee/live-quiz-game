@@ -10,6 +10,7 @@ import {
 import { generateCode } from "../utils/generateCode";
 import { Logger } from "../utils/logger";
 import { reject } from "../utils/reject";
+import { validateQuestions } from "../utils/validateQuestions";
 
 export interface Result {
   success: boolean;
@@ -33,8 +34,10 @@ export const gameReducer = (
     case CLIENT_MSG.CREATE_GAME: {
       const { questions, hostId } = action.payload;
 
-      if (!Array.isArray(questions) || questions.length === 0) {
-        return reject(state, ERROR.NO_QUESTIONS);
+      const questionsError = validateQuestions(questions);
+
+      if (questionsError) {
+        return reject(state, questionsError);
       }
 
       /** Room code */
