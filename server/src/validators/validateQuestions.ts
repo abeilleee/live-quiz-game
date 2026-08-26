@@ -1,8 +1,5 @@
-import { ERROR } from "../constants";
+import { ERROR, OPTIONS_PER_QUESTION } from "../constants";
 import { Question } from "../types";
-
-const OPTIONS_PER_QUESTION = 4;
-const LAST_OPTION_INDEX = OPTIONS_PER_QUESTION - 1;
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
@@ -30,7 +27,7 @@ const isValidQuestion = (question: unknown): boolean => {
     typeof correctIndex !== "number" ||
     !Number.isInteger(correctIndex) ||
     correctIndex < 0 ||
-    correctIndex > LAST_OPTION_INDEX
+    correctIndex >= OPTIONS_PER_QUESTION
   ) {
     return false;
   }

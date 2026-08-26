@@ -1,3 +1,6 @@
+export const OPTIONS_PER_QUESTION = 4;
+export const BASE_IDX = 0;
+
 export enum CLIENT_MSG {
   REGISTER = "reg",
   CREATE_GAME = "create_game",
@@ -19,8 +22,6 @@ export enum SERVER_MSG {
   ERROR = "error",
 }
 
-export const BASE_IDX = 0;
-
 export const enum ERROR {
   UNEXPECTED_ERROR = "Unexpected error",
   WRONG_PASSWORD = "Wrong password",
@@ -33,4 +34,9 @@ export const enum ERROR {
   GAME_NOT_FOUND = "Game not found",
   GAME_ALREADY_STARTED = "Game already started",
   NO_PLAYERS = "No players in the game",
+  GAME_NOT_IN_PROGRESS = "Game is not in progress",
+  WRONG_QUESTION = "Wrong question",
+  NOT_A_PLAYER = "Not a player in this game",
+  ALREADY_ANSWERED = "Already answered",
+  INVALID_ANSWER = "Invalid answer",
 }

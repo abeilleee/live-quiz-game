@@ -7,10 +7,11 @@ import {
   JoinGameData,
   StartGameData,
 } from "../types";
+import { validateQuestions, validateStartGame } from "../validators";
 import { generateCode } from "../utils/generateCode";
 import { Logger } from "../utils/logger";
 import { reject } from "../utils/reject";
-import { validateQuestions } from "../utils/validateQuestions";
+import { findGameById } from "../utils/findGameById";
 
 export interface Result {
   success: boolean;
@@ -98,22 +99,16 @@ export const gameReducer = (
 
     case CLIENT_MSG.START_GAME: {
       const { gameId, hostId } = action.payload;
-      const game = [...newState.values()].find((g) => g.id === gameId);
+      const game = findGameById(newState, gameId);
 
       if (!game) {
         return reject(state, ERROR.GAME_NOT_FOUND);
       }
 
-      if (game.hostId !== hostId) {
-        return reject(state, ERROR.NOT_HOST);
-      }
+      const errorMsg = validateStartGame({ hostId, game });
 
-      if (game.status !== "waiting") {
-        return reject(state, ERROR.GAME_ALREADY_STARTED);
-      }
-
-      if (game.players.length < 1) {
-        return reject(state, ERROR.NO_PLAYERS);
+      if (errorMsg) {
+        return reject(state, errorMsg);
       }
 
       game.status = "in_progress";
