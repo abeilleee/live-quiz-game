@@ -1,5 +1,5 @@
 import type { WebSocket } from "ws";
-import { CLIENT_MSG } from "./constants";
+import { CLIENT_MSG, GAME_ACTION } from "./constants";
 
 export interface Player {
   name: string;
@@ -47,6 +47,14 @@ export type GameAction =
   | {
       type: CLIENT_MSG.ANSWER;
       payload: AnswerData & { playerIndex: string };
+    }
+  | {
+      type: GAME_ACTION.END_QUESTION;
+      payload: { gameId: string; questionIndex: number };
+    }
+  | {
+      type: GAME_ACTION.NEXT_QUESTION;
+      payload: { gameId: string };
     };
 
 export interface User {
@@ -95,4 +103,36 @@ export interface RegResponseData {
   index: string;
   error: boolean;
   errorText: string;
+}
+
+export interface PlayerResult {
+  name: string;
+  answered: boolean;
+  correct: boolean;
+  pointsEarned: number;
+  totalScore: number;
+}
+
+export interface QuestionResultMessage {
+  questionIndex: number;
+  correctIndex: number;
+  playerResults: PlayerResult[];
+}
+
+export interface QuestionMessage {
+  questionNumber: number;
+  totalQuestions: number;
+  text: string;
+  options: string[];
+  timeLimitSec: number;
+}
+
+export interface ScoreboardEntry {
+  name: string;
+  score: number;
+  rank: number;
+}
+
+export interface GameFinishedMessage {
+  scoreboard: ScoreboardEntry[];
 }

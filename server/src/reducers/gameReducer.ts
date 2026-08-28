@@ -1,10 +1,14 @@
 import { randomUUID } from "node:crypto";
-import { CLIENT_MSG, ERROR } from "../constants";
+import { CLIENT_MSG, ERROR, GAME_ACTION } from "../constants";
 import {
   CreateGameData,
   Game,
   GameAction,
+  GameFinishedMessage,
   JoinGameData,
+  PlayerResult,
+  QuestionMessage,
+  QuestionResultMessage,
   StartGameData,
 } from "../types";
 import {
@@ -16,10 +20,21 @@ import { generateCode } from "../utils/generateCode";
 import { Logger } from "../utils/logger";
 import { reject } from "../utils/reject";
 import { findGameById } from "../utils/findGameById";
+import { calculatePoints } from "../utils/calculatePoints";
+import { startQuestion } from "../utils/startQuestion";
+import { buildScoreboard } from "../utils/buildScoreboard";
+import { validateEndQuestion } from "../validators/validateEndQuestion";
 
 export interface Result {
   success: boolean;
-  data: CreateGameData | JoinGameData | StartGameData | {};
+  data:
+    | CreateGameData
+    | JoinGameData
+    | StartGameData
+    | QuestionMessage
+    | QuestionResultMessage
+    | GameFinishedMessage
+    | {};
   errorText?: string;
   game?: Game;
 }
@@ -115,28 +130,19 @@ export const gameReducer = (
         return reject(state, errorMsg);
       }
 
-      game.status = "in_progress";
-      game.currentQuestion = 0;
-      game.playerAnswers = new Map();
-      game.questionStartTime = Date.now();
-
-      const currentQuestion = game.questions[game.currentQuestion];
+      const firstQuestionIdx = 0;
+      const questionMessage = startQuestion(game, firstQuestionIdx);
 
       return {
         state: newState,
         result: {
           success: true,
-          data: {
-            questionNumber: 1,
-            totalQuestions: game.questions.length,
-            text: currentQuestion.text,
-            options: currentQuestion.options,
-            timeLimitSec: currentQuestion.timeLimitSec,
-          },
+          data: questionMessage,
           game,
         },
       };
     }
+
     case CLIENT_MSG.ANSWER: {
       const { gameId, answerIndex, questionIndex, playerIndex } =
         action.payload;
@@ -165,6 +171,108 @@ export const gameReducer = (
         result: {
           success: true,
           data: { questionIndex },
+        },
+      };
+    }
+
+    case GAME_ACTION.END_QUESTION: {
+      const { gameId, questionIndex } = action.payload;
+      const game = findGameById(newState, gameId);
+
+      if (!game) {
+        return reject(state, ERROR.GAME_NOT_FOUND);
+      }
+
+      const error = validateEndQuestion({ game, questionIndex });
+
+      if (error) {
+        return reject(state, error);
+      }
+
+      const question = game.questions[questionIndex];
+      const questionStartTime = game.questionStartTime;
+
+      const playerResults: PlayerResult[] = game.players.map((player) => {
+        const playerAnswer = game.playerAnswers.get(player.index);
+        const answered = Boolean(playerAnswer);
+        const correct = Boolean(
+          playerAnswer && playerAnswer.answerIndex === question.correctIndex,
+        );
+        const pointsEarned =
+          correct && playerAnswer && questionStartTime != null
+            ? calculatePoints({
+                timeLimitSec: question.timeLimitSec,
+                questionStartTime,
+                answeredAt: playerAnswer.timestamp,
+              })
+            : 0;
+
+        player.score += pointsEarned;
+
+        return {
+          name: player.name,
+          answered,
+          correct,
+          pointsEarned,
+          totalScore: player.score,
+        };
+      });
+
+      const questionResultMessage: QuestionResultMessage = {
+        questionIndex,
+        correctIndex: question.correctIndex,
+        playerResults,
+      };
+
+      return {
+        state: newState,
+        result: {
+          success: true,
+          data: questionResultMessage,
+          game,
+        },
+      };
+    }
+
+    case GAME_ACTION.NEXT_QUESTION: {
+      const { gameId } = action.payload;
+      const game = findGameById(newState, gameId);
+
+      if (!game) {
+        return reject(state, ERROR.GAME_NOT_FOUND);
+      }
+
+      if (game.status !== "in_progress") {
+        return reject(state, ERROR.GAME_NOT_IN_PROGRESS);
+      }
+
+      const nextQuestionIndex = game.currentQuestion + 1;
+
+      if (nextQuestionIndex >= game.questions.length) {
+        game.status = "finished";
+
+        const gameFinishedMessage: GameFinishedMessage = {
+          scoreboard: buildScoreboard(game),
+        };
+
+        return {
+          state: newState,
+          result: {
+            success: true,
+            data: gameFinishedMessage,
+            game,
+          },
+        };
+      }
+
+      const questionMessage = startQuestion(game, nextQuestionIndex);
+
+      return {
+        state: newState,
+        result: {
+          success: true,
+          data: questionMessage,
+          game,
         },
       };
     }

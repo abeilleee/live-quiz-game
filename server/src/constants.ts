@@ -1,5 +1,7 @@
 export const OPTIONS_PER_QUESTION = 4;
 export const BASE_IDX = 0;
+export const BASE_POINTS = 1000;
+export const RESULTS_DISPLAY_MS = 5000;
 
 export enum CLIENT_MSG {
   REGISTER = "reg",
@@ -20,6 +22,11 @@ export enum SERVER_MSG {
   QUESTION_RESULT = "question_result",
   GAME_FINISHED = "game_finished",
   ERROR = "error",
+}
+
+export enum GAME_ACTION {
+  END_QUESTION = "end_question",
+  NEXT_QUESTION = "next_question",
 }
 
 export const enum ERROR {

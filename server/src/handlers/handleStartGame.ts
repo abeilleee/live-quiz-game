@@ -3,8 +3,8 @@ import { StartGameData } from "../types";
 import { gameStore } from "../store/gameStore";
 import { CLIENT_MSG, ERROR, SERVER_MSG } from "../constants";
 import { sendTo } from "../utils/sendTo";
-import { broadcastToParticipants } from "../utils/broadcastToParticipants";
 import { Logger } from "../utils/logger";
+import { deliverQuestion } from "./questionFlow";
 
 export const handleStartGame = ({
   ws,
@@ -29,7 +29,7 @@ export const handleStartGame = ({
     return;
   }
 
-  const { data, game } = result;
+  const { game } = result;
 
   if (!game) {
     Logger.error(ERROR.UNEXPECTED_ERROR);
@@ -37,12 +37,5 @@ export const handleStartGame = ({
   }
 
   Logger.success("Game started");
-
-  broadcastToParticipants({
-    room: game.code,
-    payload: {
-      type: SERVER_MSG.QUESTION,
-      data: data,
-    },
-  });
+  deliverQuestion(game);
 };
