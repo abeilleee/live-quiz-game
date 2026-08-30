@@ -24,9 +24,10 @@ export enum SERVER_MSG {
   ERROR = "error",
 }
 
-export enum GAME_ACTION {
+export const enum GAME_ACTION {
   END_QUESTION = "end_question",
   NEXT_QUESTION = "next_question",
+  REMOVE_PLAYER = "remove_player",
 }
 
 export const enum ERROR {

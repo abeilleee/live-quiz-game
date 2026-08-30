@@ -55,6 +55,10 @@ export type GameAction =
   | {
       type: GAME_ACTION.NEXT_QUESTION;
       payload: { gameId: string };
+    }
+  | {
+      type: GAME_ACTION.REMOVE_PLAYER;
+      payload: { playerIndex: string };
     };
 
 export interface User {

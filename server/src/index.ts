@@ -8,6 +8,7 @@ import { wsToUser } from "./store/session";
 import { sendTo } from "./utils/sendTo";
 import { handleStartGame } from "./handlers/handleStartGame";
 import { handleAnswer } from "./handlers/handleAnswer";
+import { handleDisconnect } from "./handlers/handleDisconnect";
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
@@ -57,6 +58,6 @@ wss.on("connection", (ws) => {
   });
 
   ws.on("close", () => {
-    Logger.user("User disconnected");
+    handleDisconnect({ ws });
   });
 });

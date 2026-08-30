@@ -277,6 +277,29 @@ export const gameReducer = (
       };
     }
 
+    case GAME_ACTION.REMOVE_PLAYER: {
+      const { playerIndex } = action.payload;
+      const game = [...newState.values()].find((g) =>
+        g.players.some((p) => p.index === playerIndex),
+      );
+
+      if (!game) {
+        return reject(state, ERROR.NOT_A_PLAYER);
+      }
+
+      game.players = game.players.filter((p) => p.index !== playerIndex);
+      game.playerAnswers.delete(playerIndex);
+
+      return {
+        state: newState,
+        result: {
+          success: true,
+          data: {},
+          game,
+        },
+      };
+    }
+
     default:
       return reject(state, ERROR.UNEXPECTED_ERROR);
   }
