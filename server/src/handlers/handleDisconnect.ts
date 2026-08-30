@@ -3,6 +3,7 @@ import { wsToUser } from "../store/session";
 import { gameStore } from "../store/gameStore";
 import { broadcastToParticipants } from "../utils/broadcastToParticipants";
 import { GAME_ACTION, SERVER_MSG } from "../constants";
+import { Logger } from "../utils/logger";
 
 export const handleDisconnect = ({ ws }: { ws: WebSocket }) => {
   const user = wsToUser.get(ws);
@@ -17,6 +18,7 @@ export const handleDisconnect = ({ ws }: { ws: WebSocket }) => {
   });
 
   if (success && game) {
+    Logger.user(`User ${user.name} left game ${game.code}`);
     broadcastToParticipants({
       room: game.code,
       payload: {
@@ -28,6 +30,8 @@ export const handleDisconnect = ({ ws }: { ws: WebSocket }) => {
         })),
       },
     });
+  } else {
+    Logger.user(`User ${user.name} disconnected`);
   }
 
   wsToUser.delete(ws);

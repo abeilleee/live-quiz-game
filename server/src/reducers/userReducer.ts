@@ -65,6 +65,8 @@ export const userReducer = (
         index,
       });
 
+      Logger.user(`User ${name} registered`);
+
       return {
         state: newState,
         result: {

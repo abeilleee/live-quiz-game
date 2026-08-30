@@ -31,6 +31,7 @@ wss.on("connection", (ws) => {
     const user = wsToUser.get(ws);
 
     if (!user) {
+      Logger.error(ERROR.UNREGISTERED);
       sendTo(ws, SERVER_MSG.ERROR, { message: ERROR.UNREGISTERED });
 
       return;

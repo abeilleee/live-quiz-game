@@ -1,9 +1,10 @@
 import { WebSocket } from "ws";
 import { JoinGameData } from "../types";
 import { sendTo } from "../utils/sendTo";
-import { CLIENT_MSG, SERVER_MSG } from "../constants";
+import { CLIENT_MSG, ERROR, SERVER_MSG } from "../constants";
 import { gameStore } from "../store/gameStore";
 import { broadcastToParticipants } from "../utils/broadcastToParticipants";
+import { Logger } from "../utils/logger";
 
 export const handleJoinGame = ({
   ws,
@@ -24,6 +25,7 @@ export const handleJoinGame = ({
   });
 
   if (!result.success) {
+    Logger.error(result.errorText ?? ERROR.UNEXPECTED_ERROR);
     sendTo(ws, SERVER_MSG.ERROR, {
       message: result.errorText,
     });
@@ -34,9 +36,12 @@ export const handleJoinGame = ({
   const { data, game } = result;
 
   if (!game) {
+    Logger.error(ERROR.UNEXPECTED_ERROR);
+
     return;
   }
 
+  Logger.user(`User ${name} joined game ${payload.code}`);
   sendTo(ws, SERVER_MSG.GAME_JOINED, data);
 
   // Notify all game participants

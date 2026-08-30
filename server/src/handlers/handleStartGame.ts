@@ -36,6 +36,6 @@ export const handleStartGame = ({
     return;
   }
 
-  Logger.success("Game started");
+  Logger.success(`Game ${game.code} started`);
   deliverQuestion(game);
 };

@@ -3,7 +3,6 @@ import { CLIENT_MSG, ERROR, SERVER_MSG } from "../constants";
 import { userStore } from "../store/userStore";
 import { wsToUser } from "../store/session";
 import { sendTo } from "../utils/sendTo";
-import { Logger } from "../utils/logger";
 import { RegData } from "../types";
 
 export const handleRegister = ({
@@ -20,7 +19,6 @@ export const handleRegister = ({
 
   if (success) {
     wsToUser.set(ws, { index: data.index, name: data.name });
-    Logger.user(`User ${data.name} registered`);
   }
 
   sendTo(ws, SERVER_MSG.REGISTER, {

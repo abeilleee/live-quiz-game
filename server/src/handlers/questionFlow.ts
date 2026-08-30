@@ -48,6 +48,8 @@ const onQuestionTimeUp = (game: Game, questionIndex: number) => {
         next.game.questionTimer = undefined;
       }
 
+      Logger.success(`Game ${next.game.code} finished`);
+
       broadcastToParticipants({
         room: next.game.code,
         payload: {
